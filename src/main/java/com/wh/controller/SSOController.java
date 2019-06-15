@@ -5,7 +5,6 @@ import com.wh.base.ResponseBase;
 import com.wh.entity.user.UserInfo;
 import com.wh.service.redis.RedisService;
 import com.wh.service.user.UserService;
-import com.wh.utils.CookieUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -13,8 +12,6 @@ import com.wh.toos.Constants;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.net.URLEncoder;
 
 @Controller
 @RequestMapping("/api/v1/sso")
@@ -40,32 +37,6 @@ public class SSOController {
             return "true";
         }
         return "false";
-    }
-
-    /**
-     * 服务端校验
-     *
-     * @param redirectUrl
-     * @param response
-     * @return
-     * @throws IOException
-     */
-    @GetMapping("/checkLogin")
-    public void checkLogin(@RequestParam("redirectUrl") String redirectUrl, HttpServletRequest request,
-                           HttpServletResponse response) throws IOException {
-        //1 判断是否有全局会话
-        String token = (String) request.getSession().getAttribute("token");
-        // String token1 = CookieUtil.getValue(request, "token");
-        System.out.println(token);
-        if (token == null) {
-            //如果是null
-            response.sendRedirect("http://192.168.208.123:9527/#/login?redirectUrl=" + URLEncoder.encode(redirectUrl, "UTF-8"));
-        } else {
-            //有全局会话
-            //取出令牌信息,重定向到redirectUrl,把令牌带上
-            System.out.println(redirectUrl + "?token=" + token);
-            response.sendRedirect(redirectUrl + "?" + token);
-        }
     }
 
     /**
