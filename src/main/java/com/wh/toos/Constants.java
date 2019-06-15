@@ -5,7 +5,7 @@ public interface Constants {
     /**
      * token
      */
-    String TOKEN = "token";
+    String SSO_TOKEN = "sso_token";
 
     /**
      * 设置限制登陆时间key
@@ -29,4 +29,5 @@ public interface Constants {
      */
     Integer HTTP_RES_CODE = -1;
 
+    String REDIRECT_URL = "redirect_url";
 }

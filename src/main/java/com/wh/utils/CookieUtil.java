@@ -23,7 +23,7 @@ public class CookieUtil {
      */
     public static void set(HttpServletResponse response, String key, String value, boolean ifRemember) {
         int age = ifRemember ? COOKIE_MAX_AGE : 30 * 60;
-        set(response, key, value, null, COOKIE_PATH, age, false);
+        set(response, key, value, null, COOKIE_PATH, age, true);
     }
 
     /**
@@ -41,6 +41,7 @@ public class CookieUtil {
         }
         cookie.setPath(path);
         cookie.setMaxAge(maxAge);
+        //isHttpOnly如果是true 前端js 就拿不到
         cookie.setHttpOnly(isHttpOnly);
         response.addCookie(cookie);
     }
