@@ -6,7 +6,6 @@ import com.wh.entity.user.UserInfo;
 import com.wh.service.redis.RedisService;
 import com.wh.service.user.UserService;
 import com.wh.store.SsoLoginStore;
-import com.wh.store.SsoSessionIdHelper;
 import com.wh.utils.RedisUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 
 @RestController
 @RequestMapping("/api/v1/sso")
-public class SSOController {
+public class SSOWebController {
 
     @Autowired
     private RedisService redisService;
@@ -25,21 +24,53 @@ public class SSOController {
     private UserService userService;
 
 
-    /**
-     * token校验
-     *
-     * @param token
-     * @return
-     */
-    @GetMapping("/verify")
-    public String verifyToken(@RequestParam("token") String token, @RequestParam("uid") String uid) {
-        String redisToken = redisService.getStringKey
-                (RedisUtils.redisTokenKey(uid));
-        if (token.equals(redisToken)) {
-            return "true";
-        }
-        return "false";
-    }
+//    /**
+//     * login check
+//     *
+//     * @param request
+//     * @param response
+//     * @return
+//     */
+//    public static XxlSsoUser loginCheck(HttpServletRequest request, HttpServletResponse response){
+//
+//        String cookieSessionId = CookieUtil.getValue(request, Conf.SSO_SESSIONID);
+//
+//        // cookie user
+//        XxlSsoUser xxlUser = SsoTokenLoginHelper.loginCheck(cookieSessionId);
+//        if (xxlUser != null) {
+//            return xxlUser;
+//        }
+//
+//        // redirect user
+//
+//        // remove old cookie
+//        SsoWebLoginHelper.removeSessionIdByCookie(request, response);
+//
+//        // set new cookie
+//        String paramSessionId = request.getParameter(Conf.SSO_SESSIONID);
+//        xxlUser = SsoTokenLoginHelper.loginCheck(paramSessionId);
+//        if (xxlUser != null) {
+//            CookieUtil.set(response, Conf.SSO_SESSIONID, paramSessionId, false);    // expire when browser close （client cookie）
+//            return xxlUser;
+//        }
+//
+//        return null;
+//    }
+
+//    /**
+//     * token校验
+//     *
+//     * @param token
+//     * @return
+//     */
+//    @GetMapping("/loginCheck")
+//    public String verifyToken(@RequestParam("token") String token) {
+//
+//        if (token.equals(redisToken)) {
+//            return "true";
+//        }
+//        return "false";
+//    }
 
     /**
      * 登陆
@@ -66,6 +97,8 @@ public class SSOController {
         SsoLoginStore.removeTokenByCookie(request, response, Constants.SSO_TOKEN);
         return JsonData.setResultSuccess("注销成功!");
     }
+
+
 //    /**
 //     *  web Login
 //     *

@@ -97,6 +97,12 @@ public class UserInfo extends ParentConfTable implements Serializable {
     @TableField(exist = false)
     private boolean rememberMe;
 
+    public UserInfo() {
+    }
+
+    public UserInfo(Long landingTime) {
+        this.landingTime = landingTime;
+    }
 
     public static long getSerialVersionUID() {
         return serialVersionUID;

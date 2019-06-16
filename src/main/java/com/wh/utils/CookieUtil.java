@@ -23,7 +23,7 @@ public class CookieUtil {
      */
     public static void set(HttpServletResponse response, String key, String value, boolean ifRemember) {
         int age = ifRemember ? COOKIE_MAX_AGE : 30 * 60;
-        set(response, key, value, null, COOKIE_PATH, age, true);
+        set(response, key, value, null, COOKIE_PATH, age, false);
     }
 
     /**

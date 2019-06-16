@@ -14,10 +14,10 @@ import com.wh.mapper.UserMapper;
 import com.wh.service.redis.RedisService;
 import com.wh.service.role.IWhUserRoleService;
 import com.wh.service.user.UserService;
-import com.wh.store.SsoSessionIdHelper;
 import com.wh.toos.Constants;
 import com.wh.utils.*;
 import ma.glasnost.orika.MapperFacade;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -50,16 +50,20 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserInfo> implement
      */
     @Override
     public ResponseBase doGetAuthenticationInfo(HttpServletRequest request, HttpServletResponse response, UserInfo userInfo) {
+        if (StringUtils.isBlank(userInfo.getUserName()) || StringUtils.isBlank(userInfo.getPwd())) {
+            return JsonData.setResultError("账号/或密码不能为空");
+        }
         String ttlDateKey = Constants.TTL_DATE + userInfo.getUserName();
         Long ttlDate = redisService.getTtl(ttlDateKey);
         //如果不等于null
         if (ttlDate != -1 && ttlDate != -2) {
             return JsonData.setResultError("账号/或密码错误被锁定/" + ttlDate + "秒后到期!");
         }
+        String md5Pwd = MD5Util.saltMd5(userInfo.getUserName(), userInfo.getPwd());
         LambdaQueryWrapper<UserInfo> lambdaQuery;
         //查询用户信息 更新更新登陆时间
         lambdaQuery = WrapperUtils.getLambdaQuery();
-        lambdaQuery.eq(UserInfo::getUserName, userInfo.getUserName());
+        lambdaQuery.eq(UserInfo::getUserName, userInfo.getUserName()).eq(UserInfo::getPwd, md5Pwd);
         UserInfo user = userMapper.selectOne(lambdaQuery);
         try {
             // 账号不存在 异常
@@ -78,11 +82,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserInfo> implement
                 user.setRids(whUserRole.getrIds());
             }
             //更新登陆时间
-            UserInfo upUser = new UserInfo();
-            upUser.setLandingTime(new Date().getTime());
             lambdaQuery = WrapperUtils.getLambdaQuery();
-            lambdaQuery.eq(UserInfo::getUid, user.getUid());
-            int result = userMapper.update(upUser, lambdaQuery);
+            int result = userMapper.update(new UserInfo(new Date().getTime()),
+                    lambdaQuery.eq(UserInfo::getUid, user.getUid()));
             JsonUtils.saveResult(result);
             //设置token  Cookie
             JSONObject uJson = put(response, user, userInfo.isRememberMe());
@@ -103,7 +105,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserInfo> implement
         }
         //设置 JwtToken
         String token = JwtUtils.genJsonWebToken(user);
-        if (token == null) throw new NullPointerException("--设置token失败");
         //转换dto层
         UserDto userDto = mapperFacade.map(user, UserDto.class);
 

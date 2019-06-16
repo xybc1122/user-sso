@@ -26,7 +26,7 @@ public class JwtUtils {
      */
     public static String genJsonWebToken(UserInfo user) {
         if (user == null || user.getUid() == null || StringUtils.isBlank(user.getUserName())) {
-            return null;
+            throw new NullPointerException("--设置token失败");
         }
         return Jwts.builder().setSubject(SUBJECT)
                 .claim("uid", user.getUid())
