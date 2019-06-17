@@ -22,6 +22,18 @@ public class JsonUtils {
      * @param result
      * @return
      */
+    public static void saveResult(boolean result) {
+        if (!result) {
+            throw new LsException("error");
+        }
+    }
+
+    /**
+     * 如果新增失败直接报错
+     *
+     * @param result
+     * @return
+     */
     public static void saveResult(int result) {
         if (result == 0) {
             throw new LsException("error");

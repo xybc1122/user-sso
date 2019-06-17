@@ -60,9 +60,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserInfo> implement
             return JsonData.setResultError("账号/或密码错误被锁定/" + ttlDate + "秒后到期!");
         }
         String md5Pwd = MD5Util.saltMd5(userInfo.getUserName(), userInfo.getPwd());
-        LambdaQueryWrapper<UserInfo> lambdaQuery;
         //查询用户信息 更新更新登陆时间
-        lambdaQuery = WrapperUtils.getLambdaQuery();
+        LambdaQueryWrapper<UserInfo> lambdaQuery = WrapperUtils.getLambdaQuery();
         lambdaQuery.eq(UserInfo::getUserName, userInfo.getUserName()).eq(UserInfo::getPwd, md5Pwd);
         UserInfo user = userMapper.selectOne(lambdaQuery);
         try {
@@ -82,10 +81,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserInfo> implement
                 user.setRids(whUserRole.getrIds());
             }
             //更新登陆时间
-            lambdaQuery = WrapperUtils.getLambdaQuery();
-            int result = userMapper.update(new UserInfo(new Date().getTime()),
-                    lambdaQuery.eq(UserInfo::getUid, user.getUid()));
-            JsonUtils.saveResult(result);
+            boolean update = this.lambdaUpdate().
+                    set(UserInfo::getLandingTime, new Date().getTime()).
+                    eq(UserInfo::getUid, user.getUid()).update();
+            JsonUtils.saveResult(update);
             //设置token  Cookie
             JSONObject uJson = put(response, user, userInfo.isRememberMe());
             //登陆成功后 删除Redis指定数据
