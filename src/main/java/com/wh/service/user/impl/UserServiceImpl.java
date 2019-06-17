@@ -11,7 +11,7 @@ import com.wh.entity.role.WhUserRole;
 import com.wh.entity.user.UserInfo;
 import com.wh.exception.LsException;
 import com.wh.mapper.UserMapper;
-import com.wh.service.redis.RedisService;
+import com.wh.utils.RedisUtils;
 import com.wh.service.role.IWhUserRoleService;
 import com.wh.service.user.UserService;
 import com.wh.toos.Constants;
@@ -40,7 +40,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserInfo> implement
     private MapperFacade mapperFacade;
 
     @Autowired
-    private RedisService redisService;
+    private RedisUtils redisService;
 
     /**
      * 用户认证
@@ -68,7 +68,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserInfo> implement
         try {
             // 账号不存在 异常
             if (user == null) {
-                return JsonData.setResultError("未知账户/没找到帐号,登录失败");
+                throw new LsException("账号或密码错误/没找到帐号,登录失败");
             }
             if (user.getAccountStatus() == 1) {
                 return JsonData.setResultError("账号已被锁定,请联系管理员");

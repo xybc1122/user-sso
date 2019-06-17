@@ -55,16 +55,6 @@ spring:
       minIdle: 200
       #最大等待时间：单位ms
       maxWait: 1000
-      #服务的名称
-#修改调用超时时间
-#feign:
-#  hystrix:
-#    enabled: true
-#  client:
-#    com.wh.config:
-#      default:
-#        connectTimeout: 2000
-#        readTimeout: 1000
 mybatis-plus:
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl

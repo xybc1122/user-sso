@@ -69,10 +69,6 @@ public class UserInfo extends ParentConfTable implements Serializable {
     private Long landingTime;
 
 
-    /**
-     * 状态,默认为0，普通用户，1为超级管理员
-     */
-    private Integer adminStatus;
 
 
     /**
@@ -194,14 +190,6 @@ public class UserInfo extends ParentConfTable implements Serializable {
 
     public void setLandingTime(Long landingTime) {
         this.landingTime = landingTime;
-    }
-
-    public Integer getAdminStatus() {
-        return adminStatus;
-    }
-
-    public void setAdminStatus(Integer adminStatus) {
-        this.adminStatus = adminStatus;
     }
 
 

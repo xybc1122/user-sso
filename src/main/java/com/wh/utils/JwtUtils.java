@@ -1,40 +1,49 @@
 package com.wh.utils;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
 import com.wh.entity.user.UserInfo;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * jwt工具类
  */
 public class JwtUtils {
 
-    public static final String SUBJECT = "userToken";
+    private static final String SUBJECT = "jwtToken";
 
 
-    public static final String APPSECRET = "boot999";
+    private static final String APP_SECRET = "wh-df2e8562-49f5-48bf-a554-806efd5f2fe7";
+
+    public static void main(String[] args) {
+    }
 
 
-    /**
-     * 生成jwt token
-     *
-     * @param user
-     * @return
-     */
     public static String genJsonWebToken(UserInfo user) {
-        if (user == null || user.getUid() == null || StringUtils.isBlank(user.getUserName())) {
+        if (user == null || user.getUid() == null || StringUtils.isBlank(user.getUserName())){
             throw new NullPointerException("--设置token失败");
         }
-        return Jwts.builder().setSubject(SUBJECT)
-                .claim("uid", user.getUid())
-                .claim("userName", user.getUserName())
-                .claim("tenant", user.getTenant())
-                .claim("rIds", user.getRids())
-                .setIssuedAt(new Date())//设置新的时间
-//                .setExpiration(new Date(system.currentTimeMillis() + EXPIRE))//过期时间
-                .signWith(SignatureAlgorithm.HS256, APPSECRET).compact();
+        Algorithm algorithm = Algorithm.HMAC256(APP_SECRET);
+        //头部信息
+        Map<String, Object> map = new HashMap<>();
+        map.put("alg", "HS256");
+        map.put("typ", "JWT");
+        Date nowDate = new Date();
+//           Date expireDate = getAfterDate(nowDate, 0, 0, 0, 2, 0, 0);//2小过期
+        /*设置头部信息 Header*/
+        return JWT.create().withHeader(map)
+                .withClaim("uid", user.getUid())
+                .withClaim("userName", user.getUserName())
+                .withClaim("tenant", user.getTenant())
+                .withClaim("rids", user.getRids())
+                .withIssuer("SERVICE")//签名是有谁生成 例如 服务器
+                .withSubject(SUBJECT)//签名的主题
+                .withIssuedAt(nowDate) //生成签名的时间
+                /*签名 Signature */
+                .sign(algorithm);
     }
 }
