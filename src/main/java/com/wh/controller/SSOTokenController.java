@@ -15,7 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 
 @RestController
 @RequestMapping("/api/v1/sso")
-public class SSOWebController {
+public class SSOTokenController {
 
     @Autowired
     private RedisUtils redisService;
@@ -39,12 +39,12 @@ public class SSOWebController {
      * @return
      */
     @GetMapping("/logout")
-    public ResponseBase logout(HttpServletRequest request, HttpServletResponse response, @RequestParam("uid") String uid) {
-        String cookieRedisKey = RedisUtils.redisTokenKey(uid);
+    public ResponseBase logout(@RequestParam("uid") String uid, @RequestParam("tenant") String tenant) {
+        String cookieRedisKey = RedisUtils.redisTokenKey(uid, tenant);
         //删除redis
         redisService.delKey(cookieRedisKey);
         //删除cookie
-        SsoLoginStore.removeTokenByCookie(request, response, Constants.SSO_TOKEN);
+        // SsoLoginStore.removeTokenByCookie(request, response, Constants.SSO_TOKEN);
         return JsonData.setResultSuccess("注销成功!");
     }
 

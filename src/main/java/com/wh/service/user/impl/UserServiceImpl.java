@@ -20,6 +20,7 @@ import ma.glasnost.orika.MapperFacade;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -70,7 +71,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserInfo> implement
                 throw new LsException("账号或密码错误/没找到帐号,登录失败");
             }
             if (user.getAccountStatus() == 1) {
-                return JsonData.setResultError("账号已被锁定,请联系管理员");
+                return JsonData.setResultError("账号已停用,请联系管理员");
             }
             if (user.getDelOrNot() == 1) {
                 return JsonData.setResultError("账号凭着已过期/或删除 请联系管理员");
@@ -85,8 +86,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserInfo> implement
                     set(UserInfo::getLandingTime, new Date().getTime()).
                     eq(UserInfo::getUid, user.getUid()).update();
             JsonUtils.saveResult(update);
-            //设置token  Cookie
-            JSONObject uJson = put(response, user, userInfo.isRememberMe());
+            //设置token
+            JSONObject uJson = put(user, userInfo.isRememberMe());
             //登陆成功后 删除Redis指定数据
             redisService.delKey(RedisUtils.redisErrorKey(user.getUserName()));
             return JsonData.setResultSuccess(uJson);
@@ -95,7 +96,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserInfo> implement
         }
     }
 
-    private JSONObject put(HttpServletResponse response, UserInfo user, boolean ifRemember) {
+    private JSONObject put(UserInfo user, boolean ifRemember) {
         long time;
         if (ifRemember) {
             time = 60 * 60 * 24 * 7L;
@@ -112,10 +113,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserInfo> implement
         uJson.put("token", token);
 
         //设置token
-        redisService.setString(RedisUtils.redisTokenKey(userDto.getUid()), token, time);
+        redisService.setString(RedisUtils.redisTokenKey(user.getUid().toString(), user.getTenant()), token, time);
 
         //设置Cookie
-        CookieUtil.set(response, Constants.SSO_TOKEN, token, ifRemember);
+        // CookieUtil.set(response, Constants.SSO_TOKEN, token, ifRemember);
 
         return uJson;
     }

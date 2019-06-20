@@ -26,8 +26,8 @@ public class RedisUtils {
      * @param key
      * @return
      */
-    public static String redisTokenKey(String key) {
-        return Constants.SSO_TOKEN + ":" + key;
+    public static String redisTokenKey(String key, String tenant) {
+        return Constants.SSO_TOKEN + ":" + key + "_" + tenant;
     }
 
     /**

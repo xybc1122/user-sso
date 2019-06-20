@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 
 public interface UserService extends IService<UserInfo> {
 
+
     //app 用户认证
 ResponseBase doGetAuthenticationInfo(HttpServletRequest request, HttpServletResponse response, UserInfo userInfo);
 
