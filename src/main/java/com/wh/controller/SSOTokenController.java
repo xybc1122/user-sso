@@ -41,6 +41,7 @@ public class SSOTokenController {
     @GetMapping("/logout")
     public ResponseBase logout(@RequestParam("uid") String uid, @RequestParam("tenant") String tenant) {
         String cookieRedisKey = RedisUtils.redisTokenKey(uid, tenant);
+        System.out.println("退出");
         //删除redis
         redisService.delKey(cookieRedisKey);
         //删除cookie
