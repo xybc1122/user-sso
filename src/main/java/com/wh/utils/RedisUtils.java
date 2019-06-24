@@ -37,7 +37,7 @@ public class RedisUtils {
      * @return
      */
     public static String redisErrorKey(String key) {
-        return Constants.ERROR_LOGIN + ":" + key;
+        return Constants.ERROR_LOGIN + key;
     }
 
 
@@ -92,6 +92,18 @@ public class RedisUtils {
             throw new LsException("存入失败");
         }
         throw new LsException("存入失败");
+    }
+
+    /**
+     * 设置 nx
+     *
+     * @param key
+     * @return
+     */
+    public void setEx(String key, Integer value) {
+        if (key != null) {
+            stringRedisTemplate.boundValueOps(key).increment(value);
+        }
     }
 
     /**

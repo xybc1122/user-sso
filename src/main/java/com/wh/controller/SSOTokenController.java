@@ -5,10 +5,8 @@ import com.wh.base.ResponseBase;
 import com.wh.entity.user.UserInfo;
 import com.wh.utils.RedisUtils;
 import com.wh.service.user.UserService;
-import com.wh.store.SsoLoginStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import com.wh.toos.Constants;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;

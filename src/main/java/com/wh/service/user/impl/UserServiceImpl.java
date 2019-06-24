@@ -20,8 +20,6 @@ import ma.glasnost.orika.MapperFacade;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Date;
@@ -57,7 +55,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserInfo> implement
         String ttlDateKey = Constants.TTL_DATE + userInfo.getUserName();
         Long ttlDate = redisService.getTtl(ttlDateKey);
         //如果不等于null
-        if (ttlDate != -1 && ttlDate != -2) {
+        if (ttlDate != -2) {
             return JsonData.setResultError("账号/或密码错误被锁定/" + ttlDate + "秒后到期!");
         }
         String md5Pwd = MD5Util.saltMd5(userInfo.getUserName(), userInfo.getPwd());
