@@ -20,6 +20,7 @@ import ma.glasnost.orika.MapperFacade;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Date;
@@ -99,7 +100,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserInfo> implement
         if (ifRemember) {
             time = 60 * 60 * 24 * 7L;
         } else {
-            time = 30 * 60L;
+            time = 60 * 60 * 24L;
         }
         //设置 JwtToken
         String token = JwtUtils.genJsonWebToken(user);
