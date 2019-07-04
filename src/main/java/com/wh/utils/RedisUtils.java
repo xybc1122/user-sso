@@ -30,6 +30,18 @@ public class RedisUtils {
         return Constants.SSO_TOKEN + ":" + key + "_" + tenant;
     }
 
+
+    /**
+     * 生成user key
+     *
+     * @param key
+     * @return
+     */
+    public static String redisTTLKey(String key, String tenant) {
+        return Constants.TTL_DATE + ":" + key + "_" + tenant;
+    }
+
+
     /**
      * 登陆成功后 删除Redis指定数据
      *

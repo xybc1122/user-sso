@@ -16,6 +16,8 @@ public class JwtUtils {
 
     private static final String SUBJECT = "jwtToken";
 
+    private static final String SERVICE = "sso_server";
+
 
     private static final String APP_SECRET = "wh-df2e8562-49f5-48bf-a554-806efd5f2fe7";
 
@@ -24,7 +26,7 @@ public class JwtUtils {
 
 
     public static String genJsonWebToken(UserInfo user) {
-        if (user == null || user.getUid() == null || StringUtils.isBlank(user.getUserName())){
+        if (user == null || user.getUid() == null || StringUtils.isBlank(user.getUserName())) {
             throw new NullPointerException("--设置token失败");
         }
         Algorithm algorithm = Algorithm.HMAC256(APP_SECRET);
@@ -38,9 +40,10 @@ public class JwtUtils {
         return JWT.create().withHeader(map)
                 .withClaim("uid", user.getUid())
                 .withClaim("userName", user.getUserName())
+                .withClaim("tid", user.gettId())
                 .withClaim("tenant", user.getTenant())
                 .withClaim("rids", user.getRids())
-                .withIssuer("SERVICE")//签名是有谁生成 例如 服务器
+                .withIssuer(SERVICE)//签名是有谁生成 例如 服务器
                 .withSubject(SUBJECT)//签名的主题
                 .withIssuedAt(nowDate) //生成签名的时间
                 /*签名 Signature */

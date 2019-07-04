@@ -5,7 +5,7 @@ public interface Constants {
     /**
      * token
      */
-    String SSO_TOKEN = "sso_token";
+    String SSO_TOKEN = "sso-token";
 
     /**
      * 设置限制登陆时间key

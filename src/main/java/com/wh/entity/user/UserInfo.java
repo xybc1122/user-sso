@@ -38,9 +38,9 @@ public class UserInfo extends ParentConfTable implements Serializable {
     private String pwd;
 
     /**
-     * 用户有效时间/0代表始终有效
+     * 租户有效时间/0代表始终有效
      */
-    private Long userExpirationDate;
+    private Long tenantValidityPeriod;
 
     /**
      * 密码有效期 0为始终有效  非0密码到期会提示修改密码
@@ -69,18 +69,19 @@ public class UserInfo extends ParentConfTable implements Serializable {
     private Long landingTime;
 
 
-
-
     /**
      * 头像图片url
      */
     private String imageUrl;
 
     /**
-     * 商户ID
+     * 租户标识
      */
     private String tenant;
-
+    /**
+     * 租户id
+     */
+    private Integer tId;
     /**
      * 角色id 集合
      */
@@ -92,6 +93,15 @@ public class UserInfo extends ParentConfTable implements Serializable {
      */
     @TableField(exist = false)
     private boolean rememberMe;
+
+
+    public Integer gettId() {
+        return tId;
+    }
+
+    public void settId(Integer tId) {
+        this.tId = tId;
+    }
 
     public UserInfo() {
     }
@@ -144,12 +154,12 @@ public class UserInfo extends ParentConfTable implements Serializable {
         this.pwd = pwd;
     }
 
-    public Long getUserExpirationDate() {
-        return userExpirationDate;
+    public Long getTenantValidityPeriod() {
+        return tenantValidityPeriod;
     }
 
-    public void setUserExpirationDate(Long userExpirationDate) {
-        this.userExpirationDate = userExpirationDate;
+    public void setTenantValidityPeriod(Long tenantValidityPeriod) {
+        this.tenantValidityPeriod = tenantValidityPeriod;
     }
 
     public Long getPwdValidityPeriod() {

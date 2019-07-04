@@ -3,6 +3,7 @@ package com.wh;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.web.servlet.ServletComponentScan;
 
 /**
@@ -11,7 +12,7 @@ import org.springframework.boot.web.servlet.ServletComponentScan;
  * @Author 陈恩惠
  * @Date 2019/6/11 16:07
  **/
-@SpringBootApplication
+@SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
 @MapperScan("com.wh.mapper")
 @ServletComponentScan
 public class UserApp {

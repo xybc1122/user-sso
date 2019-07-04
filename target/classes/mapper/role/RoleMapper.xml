@@ -4,8 +4,8 @@
 <mapper namespace="com.wh.mapper.WhUserRoleMapper">
     <select id="selRids" resultType="com.wh.entity.role.WhUserRole">
     select GROUP_CONCAT(r.`r_id`) AS rIds ,GROUP_CONCAT(r.`r_name`)AS rName from wh_user_role AS r
-    Left join wh_user_role_user AS ur on ur.r_id = r.r_id
-    WHERE ur.u_id =#{uid}
+    Left join (SELECT r_id,u_id from  wh_user_role_user where is_delete=0) AS ur on ur.r_id = r.r_id
+    WHERE ur.u_id =#{uid} AND r.is_delete=0
     </select>
 
 </mapper>

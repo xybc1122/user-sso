@@ -47,4 +47,7 @@ public class SSOTokenController {
         return JsonData.setResultSuccess("注销成功!");
     }
 
+
+
+
 }
