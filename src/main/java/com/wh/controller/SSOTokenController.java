@@ -6,10 +6,12 @@ import com.wh.entity.user.UserInfo;
 import com.wh.utils.RedisUtils;
 import com.wh.service.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/api/v1/sso")
@@ -27,8 +29,8 @@ public class SSOTokenController {
      * @return
      */
     @PostMapping("/login")
-    public ResponseBase login(HttpServletResponse response, HttpServletRequest request, @RequestBody UserInfo user) {
-        return userService.doGetAuthenticationInfo(request, response, user);
+    public ResponseBase login(HttpServletRequest request, @Valid @RequestBody UserInfo user, BindingResult bindingResult) {
+        return userService.doGetAuthenticationInfo(request, user, bindingResult);
     }
 
     /**
@@ -46,8 +48,6 @@ public class SSOTokenController {
         // SsoLoginStore.removeTokenByCookie(request, response, Constants.SSO_TOKEN);
         return JsonData.setResultSuccess("注销成功!");
     }
-
-
 
 
 }

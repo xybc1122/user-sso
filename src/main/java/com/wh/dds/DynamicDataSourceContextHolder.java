@@ -17,11 +17,11 @@ public class DynamicDataSourceContextHolder {
 
     private static final ThreadLocal<String> contextHolder = new ThreadLocal<String>() {
         /**
-         * 将 master 数据源的 key作为默认数据源的 key
+         * 将 the-host 数据源的 key作为默认数据源的 key
          */
         @Override
         protected String initialValue() {
-            return "master";
+            return "the-host";
         }
     };
 
@@ -38,11 +38,11 @@ public class DynamicDataSourceContextHolder {
      */
     public static void setDataSourceKey(String key) {
         //如果不是null 切换
-        if (StringUtils.isNotBlank(key)) {
+        if (containDataSourceKey(key)) {
             contextHolder.set(key);
-        }else{
-            throw new LsException("租户标识 is null 切换失败");
+            return;
         }
+        throw new LsException("预先加载没有此租户标识");
     }
 
     /**
@@ -78,6 +78,7 @@ public class DynamicDataSourceContextHolder {
      * @return
      */
     public static boolean addDataSourceKeys(Collection<? extends Object> keys) {
+
         return dataSourceKeys.addAll(keys);
     }
 }

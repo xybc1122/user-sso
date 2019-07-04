@@ -3,6 +3,7 @@ package com.wh.config;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.wh.base.ApplicationContextRegister;
 import com.wh.dds.DynamicDataSource;
+import com.wh.dds.DynamicDataSourceContextHolder;
 import com.wh.entity.tenant.WhWarehouseTenant;
 import com.wh.service.tenant.IWhWarehouseTenantService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,12 +24,16 @@ import java.util.stream.Collectors;
 @Component
 @Order(0)
 public class InitTargetDataSources implements CommandLineRunner {
-    
+
 
     @Autowired
     private IWhWarehouseTenantService tenantService;
 
-
+    /**
+     * 这里配置启动加载数据源
+     *
+     * @param args
+     */
     @Override
     public void run(String... args) {
         System.out.println("测试");
@@ -45,7 +50,7 @@ public class InitTargetDataSources implements CommandLineRunner {
                     return druidDataSource;
                 }
         ));
-        dynamicDataSource.setTargetDataSources(dataSourceMap);
+        dynamicDataSource.setDataSources(dataSourceMap);
         dynamicDataSource.afterPropertiesSet();
         System.out.println(dynamicDataSource);
     }

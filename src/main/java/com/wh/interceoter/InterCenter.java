@@ -3,6 +3,7 @@ package com.wh.interceoter;
 
 import com.wh.base.ApplicationContextRegister;
 import com.wh.base.JsonData;
+import com.wh.dds.DynamicDataSourceContextHolder;
 import com.wh.utils.IpUtils;
 import com.wh.utils.JsonUtils;
 import com.wh.utils.RedisUtils;

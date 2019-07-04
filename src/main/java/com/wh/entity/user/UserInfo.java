@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.wh.entity.ParentConfTable;
 
+import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 
 /**
@@ -30,11 +31,13 @@ public class UserInfo extends ParentConfTable implements Serializable {
     /**
      * 账号
      */
+    @NotBlank(message = "is null")
     private String userName;
 
     /**
      * 用户密码
      */
+    @NotBlank(message = "is null")
     private String pwd;
 
     /**
@@ -77,6 +80,7 @@ public class UserInfo extends ParentConfTable implements Serializable {
     /**
      * 租户标识
      */
+    @NotBlank(message = "is null")
     private String tenant;
     /**
      * 租户id
