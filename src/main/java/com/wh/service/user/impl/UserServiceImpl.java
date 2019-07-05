@@ -55,45 +55,51 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserInfo> implement
     /**
      * 用户认证
      *
-     * @param response
      * @return
      */
     @Override
-    public ResponseBase doGetAuthenticationInfo(HttpServletRequest request,UserInfo userInfo,BindingResult bindingResult) {
+    public ResponseBase doGetAuthenticationInfo(HttpServletRequest request, UserInfo userInfo, BindingResult bindingResult) {
+        boolean eTenant = false;
         //1校验参数
         String strBinding = BindingResultStore.bindingResult(bindingResult);
         if (strBinding != null) return JsonData.setResultError(strBinding);
-        //重置数据源
-        DynamicDataSourceContextHolder.clearDataSourceKey();
 
+        //重置数据源  不重置会出问题
+        DynamicDataSourceContextHolder.clearDataSourceKey();
 
         Long ttlDate = redisService.getTtl(RedisUtils.redisTTLKey(userInfo.getUserName(), userInfo.getTenant()));
         //如果不等于null
         if (ttlDate != -2) {
             return JsonData.setResultError("账号/或密码错误被锁定/" + ttlDate + "秒后到期!");
         }
-        //这里去通过tenant 主表是查询标识是否这个租户还有效
-        QueryWrapper<WhWarehouseTenant> wQuery = WrapperUtils.getQuery();
-        wQuery.select("tenant_id", "tenant_name", "t_status").eq("tenant", userInfo.getTenant());
-        WhWarehouseTenant wOne = tenantService.getOne(wQuery);
-        if (wOne == null || wOne.gettStatus() != 0) {
-            return JsonData.setResultError("租户已经过期");
+
+        if (!userInfo.getTenant().equals("the-host")) {
+            eTenant = true;
+            //这里去通过tenant 主表是查询标识是否这个租户还有效
+            QueryWrapper<WhWarehouseTenant> wQuery = WrapperUtils.getQuery();
+            wQuery.select("tenant_id", "tenant_name", "t_status").eq("tenant", userInfo.getTenant());
+            WhWarehouseTenant wOne = tenantService.getOne(wQuery);
+            if (wOne == null || wOne.gettStatus() != 0) {
+                return JsonData.setResultError("租户已经过期");
+            }
+
+            //切换租户
+            DynamicDataSourceContextHolder.setDataSourceKey(userInfo.getTenant());
         }
-        //切换租户
-        DynamicDataSourceContextHolder.setDataSourceKey(userInfo.getTenant());
+
 
         String md5Pwd = MD5Util.saltMd5(userInfo.getUserName(), userInfo.getPwd());
         //查询用户信息 更新更新登陆时间
         LambdaQueryWrapper<UserInfo> lambdaQuery = WrapperUtils.getLambdaQuery();
         lambdaQuery.eq(UserInfo::getUserName, userInfo.getUserName()).eq(UserInfo::getPwd, md5Pwd).eq(UserInfo::getTenant, userInfo.getTenant());
         UserInfo user = userMapper.selectOne(lambdaQuery);
-        System.out.println(user);
+
         try {
             // 账号不存在 异常
             if (user == null) {
                 throw new LsException("账号/密码/租户标识错误/没找到帐号,登录失败");
             }
-            if (StringUtils.isBlank(user.getTenant()) || user.gettId() == null) {
+            if (StringUtils.isBlank(user.getTenant()) || (user.gettId() == null && eTenant)) {
                 return JsonData.setResultError("此账号没有配置租户");
             }
             if (user.getAccountStatus() == 1) {
@@ -185,4 +191,5 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserInfo> implement
         }
         return JsonData.setResultError("账号或密码错误/你还有" + (4 - errorFre + "次机会"));
     }
+
 }

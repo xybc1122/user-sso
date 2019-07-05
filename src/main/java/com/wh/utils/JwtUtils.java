@@ -35,7 +35,7 @@ public class JwtUtils {
         map.put("alg", "HS256");
         map.put("typ", "JWT");
         Date nowDate = new Date();
-//           Date expireDate = getAfterDate(nowDate, 0, 0, 0, 2, 0, 0);//2小过期
+        // Date expireDate = getAfterDate(nowDate, 0, 0, 0, 2, 0, 0);//2小过期
         /*设置头部信息 Header*/
         return JWT.create().withHeader(map)
                 .withClaim("uid", user.getUid())

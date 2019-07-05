@@ -92,12 +92,22 @@ public class UserInfo extends ParentConfTable implements Serializable {
     @TableField(exist = false)
     private String rids;
 
+    @TableField(exist = false)
+    private String roleSign;
+
     /**
      * 记住我
      */
     @TableField(exist = false)
     private boolean rememberMe;
 
+    public String getRoleSign() {
+        return roleSign;
+    }
+
+    public void setRoleSign(String roleSign) {
+        this.roleSign = roleSign;
+    }
 
     public Integer gettId() {
         return tId;

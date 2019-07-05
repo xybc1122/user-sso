@@ -27,7 +27,8 @@ public class RedisUtils {
      * @return
      */
     public static String redisTokenKey(String key, String tenant) {
-        return Constants.SSO_TOKEN + ":" + key + "_" + tenant;
+
+        return tenant + ":" + Constants.SSO_TOKEN + ":" + key;
     }
 
 
@@ -38,7 +39,7 @@ public class RedisUtils {
      * @return
      */
     public static String redisTTLKey(String key, String tenant) {
-        return Constants.TTL_DATE + ":" + key + "_" + tenant;
+        return tenant + ":" + Constants.TTL_DATE + ":" + key;
     }
 
 
