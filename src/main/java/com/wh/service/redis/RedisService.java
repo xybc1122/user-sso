@@ -1,4 +1,4 @@
-package com.wh.utils;
+package com.wh.service.redis;
 
 
 import com.wh.exception.LsException;
@@ -14,7 +14,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 @Component
-public class RedisUtils {
+public class RedisService {
 
     @Autowired
     private StringRedisTemplate stringRedisTemplate;

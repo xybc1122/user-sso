@@ -1,5 +1,7 @@
 package com.wh.utils;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.google.gson.Gson;
 import com.wh.exception.LsException;
 
@@ -38,6 +40,25 @@ public class JsonUtils {
         if (result == 0) {
             throw new LsException("error");
         }
+
+    }
+
+    /**
+     * Object 转换string
+     *
+     * @return
+     */
+    public static String getJsonObj(Object obj) {
+        return JSONObject.toJSONString(obj);
+    }
+
+    /**
+     * Object 转换Array;
+     *
+     * @return
+     */
+    public static JSONArray getJsonArr(Object obj) {
+        return JSONArray.parseArray(getJsonObj(obj));
     }
 
     /**

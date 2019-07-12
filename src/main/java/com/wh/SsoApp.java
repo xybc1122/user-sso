@@ -5,6 +5,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.web.servlet.ServletComponentScan;
+import org.springframework.cloud.client.circuitbreaker.EnableCircuitBreaker;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 
 /**
  * @ClassName UserApp
@@ -15,10 +17,12 @@ import org.springframework.boot.web.servlet.ServletComponentScan;
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
 @MapperScan("com.wh.mapper")
 @ServletComponentScan
-public class UserApp {
+@EnableFeignClients  //开启 Feign调用
+@EnableCircuitBreaker //开启熔断
+public class SsoApp {
 
     public static void main(String[] args) {
-        SpringApplication.run(UserApp.class, args);
+        SpringApplication.run(SsoApp.class, args);
     }
 
 }

@@ -1,11 +1,11 @@
 #指定注册中心地址
-#eureka:
-#  client:
-#    serviceUrl:
-#      defaultZone: http://192.168.1.191:8660/eureka/
-#  instance:
-#    instance-id: ${spring.cloud.client.ip-address}:${server.port}
-#    prefer-ip-address: true
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://192.168.1.231:8660/eureka/
+  instance:
+    instance-id: ${spring.cloud.client.ip-address}:${server.port}
+    prefer-ip-address: true
 server:
   port: 9001
 spring:
@@ -18,6 +18,8 @@ spring:
       password: root
     ################Redis
     #连接第0个库
+  application:
+    name: sso-service
   redis:
     database: 0
     #连接的地址
@@ -35,6 +37,22 @@ spring:
       minIdle: 200
       #最大等待时间：单位ms
       maxWait: 1000
+#请求处理的超时时间
+ribbon:
+  ReadTimeout: 4000
+  #请求连接的超时时间
+  ConnectTimeout: 3000
+#hystrix 配置
+hystrix:
+  command:
+    default:
+      execution:
+        timeout:
+          #如果enabled设置为false，则请求超时交给ribbon控制
+          enabled: true
+        isolation:
+          thread:
+            timeoutInMilliseconds: 5000
 mybatis-plus:
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
@@ -43,4 +61,4 @@ mybatis-plus:
     db-config:
       logic-delete-value: 1 # 逻辑已删除值(默认为 1)
       logic-not-delete-value: 0 # 逻辑未删除值(默认为 0)
-  mapper-locations: classpath*:mapper/**/*.xml  #配置映射xml地址
+  #mapper-locations: classpath*:mapper/**/*.xml  #配置映射xml地址

@@ -3,21 +3,19 @@ package com.wh.service.user.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.extension.service.additional.query.impl.LambdaQueryChainWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wh.base.JsonData;
 import com.wh.base.ResponseBase;
 import com.wh.dds.DynamicDataSourceContextHolder;
+import com.wh.dto.TenantStateDto;
 import com.wh.dto.UserDto;
 import com.wh.entity.role.WhUserRole;
-import com.wh.entity.tenant.WhWarehouseTenant;
 import com.wh.entity.user.UserInfo;
 import com.wh.exception.LsException;
+import com.wh.feign.TenantFeignClient;
 import com.wh.mapper.UserMapper;
-import com.wh.service.tenant.IWhWarehouseTenantService;
 import com.wh.store.BindingResultStore;
-import com.wh.utils.RedisUtils;
+import com.wh.service.redis.RedisService;
 import com.wh.service.role.IWhUserRoleService;
 import com.wh.service.user.UserService;
 import com.wh.utils.*;
@@ -28,7 +26,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.util.Date;
 
 
@@ -40,6 +37,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserInfo> implement
     @Autowired
     private IWhUserRoleService roleService;
 
+    @Autowired
+    private TenantFeignClient feignClient;
+
     /**
      * dto 转换工具
      */
@@ -47,10 +47,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserInfo> implement
     private MapperFacade mapperFacade;
 
     @Autowired
-    private RedisUtils redisService;
-
-    @Autowired
-    private IWhWarehouseTenantService tenantService;
+    private RedisService redisService;
 
     /**
      * 用户认证
@@ -59,7 +56,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserInfo> implement
      */
     @Override
     public ResponseBase doGetAuthenticationInfo(HttpServletRequest request, UserInfo userInfo, BindingResult bindingResult) {
-        boolean eTenant = false;
         //1校验参数
         String strBinding = BindingResultStore.bindingResult(bindingResult);
         if (strBinding != null) return JsonData.setResultError(strBinding);
@@ -67,39 +63,34 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserInfo> implement
         //重置数据源  不重置会出问题
         DynamicDataSourceContextHolder.clearDataSourceKey();
 
-        Long ttlDate = redisService.getTtl(RedisUtils.redisTTLKey(userInfo.getUserName(), userInfo.getTenant()));
+        Long ttlDate = redisService.getTtl(RedisService.redisTTLKey(userInfo.getUserName(), userInfo.getTenant()));
         //如果不等于null
         if (ttlDate != -2) {
             return JsonData.setResultError("账号/或密码错误被锁定/" + ttlDate + "秒后到期!");
         }
+        //这里去通过tenant 主表是查询标识是否这个租户还有效
+        TenantStateDto tenantDto = feignClient.selTenantStatus(userInfo.getTenant());
 
-        if (!userInfo.getTenant().equals("the-host")) {
-            eTenant = true;
-            //这里去通过tenant 主表是查询标识是否这个租户还有效
-            QueryWrapper<WhWarehouseTenant> wQuery = WrapperUtils.getQuery();
-            wQuery.select("tenant_id", "tenant_name", "t_status").eq("tenant", userInfo.getTenant());
-            WhWarehouseTenant wOne = tenantService.getOne(wQuery);
-            if (wOne == null || wOne.gettStatus() != 0) {
-                return JsonData.setResultError("租户已经过期");
-            }
-
-            //切换租户
-            DynamicDataSourceContextHolder.setDataSourceKey(userInfo.getTenant());
+        if (tenantDto == null || tenantDto.gettStatus() != 0) {
+            return JsonData.setResultError("没有此租户/租户已经冻结");
+        } else if (tenantDto.getEffectiveTime() != 0 && tenantDto.getEffectiveTime() < new Date().getTime()) {
+            return JsonData.setResultError("租户已过期");
         }
 
+        //切换租户
+        DynamicDataSourceContextHolder.setDataSourceKey(userInfo.getTenant());
 
         String md5Pwd = MD5Util.saltMd5(userInfo.getUserName(), userInfo.getPwd());
         //查询用户信息 更新更新登陆时间
         LambdaQueryWrapper<UserInfo> lambdaQuery = WrapperUtils.getLambdaQuery();
         lambdaQuery.eq(UserInfo::getUserName, userInfo.getUserName()).eq(UserInfo::getPwd, md5Pwd).eq(UserInfo::getTenant, userInfo.getTenant());
         UserInfo user = userMapper.selectOne(lambdaQuery);
-
         try {
             // 账号不存在 异常
             if (user == null) {
                 throw new LsException("账号/密码/租户标识错误/没找到帐号,登录失败");
             }
-            if (StringUtils.isBlank(user.getTenant()) || (user.gettId() == null && eTenant)) {
+            if (StringUtils.isBlank(user.getTenant()) || user.gettId() == null) {
                 return JsonData.setResultError("此账号没有配置租户");
             }
             if (user.getAccountStatus() == 1) {
@@ -121,7 +112,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserInfo> implement
             //设置token
             JSONObject uJson = put(user, userInfo.isRememberMe());
             //登陆成功后 删除Redis指定数据
-            redisService.delKey(RedisUtils.redisErrorKey(user.getUserName()));
+            redisService.delKey(RedisService.redisErrorKey(user.getUserName()));
             return JsonData.setResultSuccess(uJson);
         } catch (LsException ls) {
             return setLockingTime(userInfo.getUserName(), userInfo.getTenant());
@@ -145,7 +136,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserInfo> implement
         uJson.put("token", token);
 
         //设置token
-        redisService.setString(RedisUtils.redisTokenKey(user.getUid().toString(), user.getTenant()), token, time);
+        redisService.setString(RedisService.redisTokenKey(user.getUid().toString(), user.getTenant()), token, time);
 
         //设置Cookie
         // CookieUtil.set(response, Constants.SSO_TOKEN, token, ifRemember);
@@ -158,7 +149,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserInfo> implement
         errorNumber++;
         int errorFre;
         long lockingTime;
-        String errKey = RedisUtils.redisErrorKey(userName);
+        String errKey = RedisService.redisErrorKey(userName);
         String redisErrorNumber = redisService.getStringKey(errKey);
         //报错后 先进来看看 这个账号有没有在Redis里 ---如果里面有 进去
         if (redisErrorNumber != null) {
@@ -186,7 +177,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserInfo> implement
                 default:
                     lockingTime = 60L * 60 * 24;
             }
-            redisService.setString(RedisUtils.redisTTLKey(userName, tenant), "error", lockingTime);
+            redisService.setString(RedisService.redisTTLKey(userName, tenant), "error", lockingTime);
             return JsonData.setResultError("账号被锁定!" + lockingTime + "秒");
         }
         return JsonData.setResultError("账号或密码错误/你还有" + (4 - errorFre + "次机会"));
