@@ -20,15 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 public interface TenantFeignClient {
 
     /**
-     * 调用租户列表 存入数据库
-     *
-     * @return
-     */
-    @GetMapping(value = "/api/v1/tenant/tenantList")
-    ResponseBase getTenantList();
-
-    /**
-     * 调用租户列表 存入数据库
+     * 查询租户状态
      *
      * @return
      */

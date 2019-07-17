@@ -30,7 +30,16 @@ public class RedisService {
 
         return tenant + ":" + Constants.SSO_TOKEN + ":" + key;
     }
+    /**
+     * 生成 keys
+     *
+     * @param tenant
+     * @return
+     */
+    public static String redisTenantKey(String tenant) {
 
+        return Constants.TENANT_KEY + ":" + tenant;
+    }
 
     /**
      * 生成user key

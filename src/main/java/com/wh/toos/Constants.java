@@ -30,4 +30,11 @@ public interface Constants {
     Integer HTTP_RES_CODE = -1;
 
     String REDIRECT_URL = "redirect_url";
+
+
+    /**
+     * 租户key
+     */
+    String TENANT_KEY = "tenant_key";
+
 }

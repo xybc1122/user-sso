@@ -14,12 +14,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class TenantClientFallback implements TenantFeignClient {
     @Override
-    public ResponseBase getTenantList() {
-        System.out.println("error");
-        return null;
-    }
-
-    @Override
     public TenantStateDto selTenantStatus(String tenant) {
         System.out.println("error");
         return null;

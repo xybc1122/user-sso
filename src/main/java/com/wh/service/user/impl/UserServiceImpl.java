@@ -14,6 +14,7 @@ import com.wh.entity.user.UserInfo;
 import com.wh.exception.LsException;
 import com.wh.feign.TenantFeignClient;
 import com.wh.mapper.UserMapper;
+import com.wh.service.tenant.TenantService;
 import com.wh.store.BindingResultStore;
 import com.wh.service.redis.RedisService;
 import com.wh.service.role.IWhUserRoleService;
@@ -39,6 +40,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserInfo> implement
 
     @Autowired
     private TenantFeignClient feignClient;
+
+    @Autowired
+    private TenantService tenantService;
 
     /**
      * dto 转换工具
@@ -76,9 +80,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserInfo> implement
         } else if (tenantDto.getEffectiveTime() != 0 && tenantDto.getEffectiveTime() < new Date().getTime()) {
             return JsonData.setResultError("租户已过期");
         }
-
         //切换租户
-        DynamicDataSourceContextHolder.setDataSourceKey(userInfo.getTenant());
+        tenantService.switchTenant(userInfo.getTenant());
 
         String md5Pwd = MD5Util.saltMd5(userInfo.getUserName(), userInfo.getPwd());
         //查询用户信息 更新更新登陆时间
